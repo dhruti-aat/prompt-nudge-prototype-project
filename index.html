@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prompt Nudge Prototype</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .chat-area {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    .nudge-above {
+      background: #eef4ff;
+      border-left: 4px solid #4a7cff;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 11px 20px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    .output {
+      margin-top: 20px;
+      padding: 14px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      display: none;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Prompt Nudge Chatbox Prototype</h1>
+    <p class="subtitle">
+      This prototype shows how a user-facing nudge can appear inside the prompt box or above it before the user writes.
+    </p>
+
+    <div class="controls">
+      <div>
+        <label><strong>Nudge:</strong></label><br>
+        <select id="nudgeSelect" onchange="updateNudge()">
+          <option value="polite">Be polite</option>
+          <option value="concise">Be concise</option>
+          <option value="context">Add context</option>
+          <option value="specific">Be specific</option>
+          <option value="none">No nudge</option>
+        </select>
+      </div>
+
+      <div>
+        <label><strong>Placement:</strong></label><br>
+        <select id="placementSelect" onchange="updateNudge()">
+          <option value="above">Above prompt box</option>
+          <option value="inside">Inside prompt box</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div id="nudgeAbove" class="nudge-above"></div>
+
+      <textarea id="promptBox"></textarea>
+
+      <br>
+      <button onclick="sendPrompt()">Send Prompt</button>
+
+      <div id="output" class="output">
+        <div class="label">Response:</div>
+        <div id="submittedPrompt"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nudges = {
+      polite: {
+        title: "Be polite",
+        text: "Use respectful and courteous language when writing your prompt.",
+        placeholder: "Be polite... For example: Please help me write..."
+      },
+      concise: {
+        title: "Be concise",
+        text: "Keep your prompt short, clear, and direct.",
+        placeholder: "Be concise... State your request clearly in one or two sentences."
+      },
+      context: {
+        title: "Add context",
+        text: "Include background information that may help the AI understand your request.",
+        placeholder: "Add context... Explain the situation, audience, or goal."
+      },
+      specific: {
+        title: "Be specific",
+        text: "State exactly what you want, including format, length, tone, or constraints.",
+        placeholder: "Be specific... Mention format, tone, length, or requirements."
+      },
+      none: {
+        title: "",
+        text: "",
+        placeholder: "Type your prompt here..."
+      }
+    };
+
+    function updateNudge() {
+      const nudgeKey = document.getElementById("nudgeSelect").value;
+      const placement = document.getElementById("placementSelect").value;
+      const nudge = nudges[nudgeKey];
+
+      const nudgeAbove = document.getElementById("nudgeAbove");
+      const promptBox = document.getElementById("promptBox");
+
+      if ((placement === "above" || placement === "both") && nudgeKey !== "none") {
+        nudgeAbove.style.display = "block";
+        nudgeAbove.innerHTML = "<strong>Nudge: " + nudge.title + ".</strong><br>" + nudge.text;
+      } else {
+        nudgeAbove.style.display = "none";
+      }
+
+      if ((placement === "inside" || placement === "both") && nudgeKey !== "none") {
+        promptBox.placeholder = nudge.placeholder;
+      } else {
+        promptBox.placeholder = "Type your prompt here...";
+      }
+    }
+
+    async function sendPrompt() {
+      const prompt = document.getElementById("promptBox").value.trim();
+
+      const output = document.getElementById("output");
+      const submittedPrompt = document.getElementById("submittedPrompt");
+
+      output.style.display = "block";
+
+      if (!prompt) {
+        submittedPrompt.innerText = "Please enter a prompt first.";
+        return;
+      }
+
+      submittedPrompt.innerText = "Thinking...";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ prompt: prompt })
+        });
+
+        const data = await response.json();
+        
+        document.getElementById("promptBox").value = "";
+
+        submittedPrompt.innerText =
+          "User prompt:\n" + prompt + "\n\nAI response:\n" + data.reply;
+
+      } catch (error) {
+        submittedPrompt.innerText = "Error connecting to the AI server.";
+        console.error(error);
+      }
+    }
+
+    updateNudge();
+  </script>
+</body>
+</html>
