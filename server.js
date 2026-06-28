@@ -9,6 +9,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("."));
 
+app.get("/", (req, res) => {
+  res.sendFile(process.cwd() + "/index.html");
+});
+
 app.post("/chat", async (req, res) => {
   try {
     const userPrompt = req.body.prompt;
