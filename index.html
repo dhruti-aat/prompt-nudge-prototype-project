@@ -1,118 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prompt Nudge Prototype</title>
   <style>
-    body {
+    :root {
+      color-scheme: light;
       font-family: Arial, sans-serif;
       background: #f4f6f8;
+      color: #172033;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
       margin: 0;
-      padding: 40px;
+      padding: 32px 18px;
     }
 
     .container {
-      max-width: 850px;
+      max-width: 900px;
       margin: auto;
       background: white;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-      margin-bottom: 5px;
-    }
-
-    .subtitle {
-      color: #555;
-      margin-bottom: 25px;
-    }
+    h1 { margin: 0 0 6px; }
+    .subtitle { color: #536174; margin: 0 0 24px; }
 
     .controls {
       display: flex;
-      gap: 15px;
-      margin-bottom: 25px;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 18px;
       flex-wrap: wrap;
     }
 
+    .control { min-width: 180px; }
+    label { display: block; font-weight: 700; margin-bottom: 6px; }
+
+    select, textarea, button { font: inherit; }
+
     select {
+      width: 100%;
       padding: 10px;
-      font-size: 15px;
+      border: 1px solid #c8ced8;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      background: white;
     }
 
-    .chat-area {
-      border: 1px solid #ddd;
+    button {
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #1f2937;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover { background: #374151; }
+    button:disabled { cursor: wait; opacity: 0.65; }
+    .secondary { background: #e9edf3; color: #273449; }
+    .secondary:hover { background: #dce2ea; }
+
+    .chat-shell {
+      border: 1px solid #d9dee7;
       border-radius: 12px;
+      background: #fafbfc;
+      overflow: hidden;
+    }
+
+    .messages {
+      height: 380px;
+      overflow-y: auto;
       padding: 20px;
-      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    .empty-state {
+      margin: auto;
+      color: #758195;
+      text-align: center;
+      max-width: 420px;
+      line-height: 1.5;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #1f2937;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: white;
+      border: 1px solid #d9dee7;
+      border-bottom-left-radius: 4px;
+    }
+
+    .composer {
+      padding: 16px;
+      border-top: 1px solid #d9dee7;
+      background: white;
     }
 
     .nudge-above {
       background: #eef4ff;
       border-left: 4px solid #4a7cff;
-      padding: 12px;
-      margin-bottom: 12px;
+      padding: 11px 12px;
+      margin-bottom: 10px;
       border-radius: 8px;
-      font-size: 15px;
+      line-height: 1.35;
     }
 
     textarea {
+      display: block;
       width: 100%;
-      height: 120px;
-      padding: 14px;
-      font-size: 16px;
+      min-height: 96px;
+      padding: 13px;
+      border: 1px solid #b9c1cd;
       border-radius: 10px;
-      border: 1px solid #bbb;
       resize: vertical;
-      box-sizing: border-box;
     }
 
-    button {
-      margin-top: 12px;
-      padding: 11px 20px;
-      font-size: 15px;
-      border: none;
-      border-radius: 8px;
-      background: #222;
-      color: white;
-      cursor: pointer;
+    textarea:focus, select:focus {
+      outline: 3px solid rgba(74, 124, 255, 0.18);
+      border-color: #4a7cff;
     }
 
-    button:hover {
-      background: #444;
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
     }
 
-    .output {
-      margin-top: 20px;
-      padding: 14px;
-      background: white;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      display: none;
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
+    .status { color: #687588; font-size: 14px; }
 
-    .label {
-      font-weight: bold;
-      margin-bottom: 6px;
+    @media (max-width: 640px) {
+      body { padding: 0; }
+      .container { min-height: 100vh; border-radius: 0; padding: 20px 14px; }
+      .messages { height: 48vh; }
+      .message { max-width: 92%; }
+      .control { flex: 1 1 100%; }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <main class="container">
     <h1>Prompt Nudge Chatbox Prototype</h1>
-    <p class="subtitle">
-      This prototype shows how a user-facing nudge can appear inside the prompt box or above it before the user writes.
-    </p>
+    <p class="subtitle">Choose a writing nudge, then continue a real multi-turn conversation.</p>
 
     <div class="controls">
-      <div>
-        <label><strong>Nudge:</strong></label><br>
-        <select id="nudgeSelect" onchange="updateNudge()">
+      <div class="control">
+        <label for="nudgeSelect">Nudge</label>
+        <select id="nudgeSelect">
           <option value="polite">Be polite</option>
           <option value="concise">Be concise</option>
           <option value="context">Add context</option>
@@ -121,32 +181,34 @@
         </select>
       </div>
 
-      <div>
-        <label><strong>Placement:</strong></label><br>
-        <select id="placementSelect" onchange="updateNudge()">
+      <div class="control">
+        <label for="placementSelect">Placement</label>
+        <select id="placementSelect">
           <option value="above">Above prompt box</option>
           <option value="inside">Inside prompt box</option>
           <option value="both">Both</option>
         </select>
       </div>
+
+      <button id="newChatButton" class="secondary" type="button">New conversation</button>
     </div>
 
-    <div class="chat-area">
-      <div id="nudgeAbove" class="nudge-above"></div>
+    <section class="chat-shell" aria-label="Chat conversation">
+      <div id="messages" class="messages" aria-live="polite"></div>
 
-      <textarea id="promptBox"></textarea>
-
-      <br>
-      <button onclick="sendPrompt()">Send Prompt</button>
-
-      <div id="output" class="output">
-        <div class="label">Response:</div>
-        <div id="submittedPrompt"></div>
+      <div class="composer">
+        <div id="nudgeAbove" class="nudge-above"></div>
+        <textarea id="promptBox" aria-label="Prompt"></textarea>
+        <div class="composer-actions">
+          <span id="status" class="status">Ready</span>
+          <button id="sendButton" type="button">Send prompt</button>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <script>
+    const STORAGE_KEY = "prompt-nudge-v2-conversation";
     const nudges = {
       polite: {
         title: "Be polite",
@@ -168,73 +230,147 @@
         text: "State exactly what you want, including format, length, tone, or constraints.",
         placeholder: "Be specific... Mention format, tone, length, or requirements."
       },
-      none: {
-        title: "",
-        text: "",
-        placeholder: "Type your prompt here..."
-      }
+      none: { title: "", text: "", placeholder: "Type your prompt here..." }
     };
 
-    function updateNudge() {
-      const nudgeKey = document.getElementById("nudgeSelect").value;
-      const placement = document.getElementById("placementSelect").value;
-      const nudge = nudges[nudgeKey];
+    const messagesElement = document.getElementById("messages");
+    const promptBox = document.getElementById("promptBox");
+    const sendButton = document.getElementById("sendButton");
+    const newChatButton = document.getElementById("newChatButton");
+    const nudgeSelect = document.getElementById("nudgeSelect");
+    const placementSelect = document.getElementById("placementSelect");
+    const nudgeAbove = document.getElementById("nudgeAbove");
+    const statusElement = document.getElementById("status");
 
-      const nudgeAbove = document.getElementById("nudgeAbove");
-      const promptBox = document.getElementById("promptBox");
+    let conversation = loadConversation();
 
-      if ((placement === "above" || placement === "both") && nudgeKey !== "none") {
-        nudgeAbove.style.display = "block";
-        nudgeAbove.innerHTML = "<strong>Nudge: " + nudge.title + ".</strong><br>" + nudge.text;
-      } else {
-        nudgeAbove.style.display = "none";
+    function loadConversation() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && Array.isArray(saved.messages)) {
+          return {
+            messages: saved.messages.filter(
+              message => message && ["user", "assistant"].includes(message.role) && typeof message.text === "string"
+            ),
+            previousResponseId: typeof saved.previousResponseId === "string" ? saved.previousResponseId : null
+          };
+        }
+      } catch (error) {
+        console.warn("Could not restore the saved conversation.", error);
       }
-
-      if ((placement === "inside" || placement === "both") && nudgeKey !== "none") {
-        promptBox.placeholder = nudge.placeholder;
-      } else {
-        promptBox.placeholder = "Type your prompt here...";
-      }
+      return { messages: [], previousResponseId: null };
     }
 
-    async function sendPrompt() {
-      const prompt = document.getElementById("promptBox").value.trim();
+    function saveConversation() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversation));
+    }
 
-      const output = document.getElementById("output");
-      const submittedPrompt = document.getElementById("submittedPrompt");
-
-      output.style.display = "block";
-
-      if (!prompt) {
-        submittedPrompt.innerText = "Please enter a prompt first.";
+    function renderMessages() {
+      messagesElement.innerHTML = "";
+      if (conversation.messages.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "Your prompts and responses will stay here so you can scroll back and continue the conversation.";
+        messagesElement.appendChild(empty);
         return;
       }
 
-      submittedPrompt.innerText = "Thinking...";
+      for (const message of conversation.messages) {
+        const bubble = document.createElement("div");
+        bubble.className = `message ${message.role}`;
+        bubble.textContent = message.text;
+        messagesElement.appendChild(bubble);
+      }
+      messagesElement.scrollTop = messagesElement.scrollHeight;
+    }
+
+    function updateNudge() {
+      const nudgeKey = nudgeSelect.value;
+      const placement = placementSelect.value;
+      const nudge = nudges[nudgeKey];
+
+      if ((placement === "above" || placement === "both") && nudgeKey !== "none") {
+        nudgeAbove.hidden = false;
+        nudgeAbove.replaceChildren();
+        const strong = document.createElement("strong");
+        strong.textContent = `Nudge: ${nudge.title}.`;
+        nudgeAbove.append(strong, document.createElement("br"), document.createTextNode(nudge.text));
+      } else {
+        nudgeAbove.hidden = true;
+      }
+
+      promptBox.placeholder =
+        (placement === "inside" || placement === "both") && nudgeKey !== "none"
+          ? nudge.placeholder
+          : "Type your prompt here...";
+    }
+
+    function setLoading(isLoading) {
+      sendButton.disabled = isLoading;
+      promptBox.disabled = isLoading;
+      statusElement.textContent = isLoading ? "Thinking..." : "Ready";
+    }
+
+    async function sendPrompt() {
+      const prompt = promptBox.value.trim();
+      if (!prompt || sendButton.disabled) return;
+
+      conversation.messages.push({ role: "user", text: prompt });
+      promptBox.value = "";
+      saveConversation();
+      renderMessages();
+      setLoading(true);
 
       try {
         const response = await fetch("/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ prompt: prompt })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            previousResponseId: conversation.previousResponseId,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          })
         });
 
         const data = await response.json();
-        
-        document.getElementById("promptBox").value = "";
+        if (!response.ok) throw new Error(data.reply || "The request failed.");
 
-        submittedPrompt.innerText =
-          "User prompt:\n" + prompt + "\n\nAI response:\n" + data.reply;
-
+        conversation.messages.push({ role: "assistant", text: data.reply });
+        conversation.previousResponseId = data.responseId || null;
       } catch (error) {
-        submittedPrompt.innerText = "Error connecting to the AI server.";
-        console.error(error);
+        conversation.messages.push({
+          role: "assistant",
+          text: error.message || "The AI could not respond right now. Please try again."
+        });
+      } finally {
+        saveConversation();
+        renderMessages();
+        setLoading(false);
+        promptBox.focus();
       }
     }
 
+    function startNewConversation() {
+      conversation = { messages: [], previousResponseId: null };
+      saveConversation();
+      renderMessages();
+      statusElement.textContent = "New conversation started";
+      promptBox.focus();
+    }
+
+    nudgeSelect.addEventListener("change", updateNudge);
+    placementSelect.addEventListener("change", updateNudge);
+    sendButton.addEventListener("click", sendPrompt);
+    newChatButton.addEventListener("click", startNewConversation);
+    promptBox.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendPrompt();
+      }
+    });
+
     updateNudge();
+    renderMessages();
   </script>
 </body>
 </html>
