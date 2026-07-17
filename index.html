@@ -13,21 +13,66 @@
     }
 
     * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px 16px; }
 
-    body {
-      margin: 0;
-      padding: 32px 18px;
-    }
-
-    .container {
-      max-width: 900px;
+    .app {
+      max-width: 1120px;
+      min-height: 760px;
       margin: auto;
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
       background: white;
-      padding: 28px;
       border-radius: 16px;
+      overflow: hidden;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
     }
 
+    .history-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 20px 14px;
+      background: #172033;
+      color: white;
+    }
+
+    .history-panel h2 { margin: 0; font-size: 18px; }
+
+    .history-list {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: #dce4ef;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .history-item:hover, .history-item.active {
+      background: #273449;
+      border-color: #3e4b60;
+      color: white;
+    }
+
+    .history-title {
+      display: block;
+      overflow: hidden;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-date { display: block; margin-top: 4px; color: #9cabc0; font-size: 12px; }
+    .workspace { min-width: 0; padding: 28px; }
     h1 { margin: 0 0 6px; }
     .subtitle { color: #536174; margin: 0 0 24px; }
 
@@ -40,8 +85,7 @@
     }
 
     .control { min-width: 180px; }
-    label { display: block; font-weight: 700; margin-bottom: 6px; }
-
+    label { display: block; margin-bottom: 6px; font-weight: 700; }
     select, textarea, button { font: inherit; }
 
     select {
@@ -63,18 +107,24 @@
 
     button:hover { background: #374151; }
     button:disabled { cursor: wait; opacity: 0.65; }
-    .secondary { background: #e9edf3; color: #273449; }
-    .secondary:hover { background: #dce2ea; }
+
+    .secondary {
+      border: 1px solid #46546a;
+      background: transparent;
+      color: white;
+    }
+
+    .secondary:hover { background: #273449; }
 
     .chat-shell {
+      overflow: hidden;
       border: 1px solid #d9dee7;
       border-radius: 12px;
       background: #fafbfc;
-      overflow: hidden;
     }
 
     .messages {
-      height: 380px;
+      height: 430px;
       overflow-y: auto;
       padding: 20px;
       display: flex;
@@ -84,34 +134,79 @@
     }
 
     .empty-state {
+      max-width: 430px;
       margin: auto;
       color: #758195;
-      text-align: center;
-      max-width: 420px;
       line-height: 1.5;
+      text-align: center;
     }
 
     .message {
-      max-width: 80%;
+      max-width: 82%;
       padding: 12px 14px;
       border-radius: 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
       overflow-wrap: anywhere;
+      line-height: 1.5;
     }
 
     .message.user {
       align-self: flex-end;
+      border-bottom-right-radius: 4px;
       background: #1f2937;
       color: white;
-      border-bottom-right-radius: 4px;
+      white-space: pre-wrap;
     }
 
     .message.assistant {
       align-self: flex-start;
-      background: white;
       border: 1px solid #d9dee7;
       border-bottom-left-radius: 4px;
+      background: white;
+    }
+
+    .message.assistant p { margin: 0 0 10px; }
+    .message.assistant p:last-child { margin-bottom: 0; }
+    .message.assistant ul, .message.assistant ol { margin: 8px 0; padding-left: 22px; }
+    .message.assistant pre { overflow-x: auto; padding: 10px; border-radius: 8px; background: #eef1f5; }
+    .message.assistant code { padding: 2px 4px; border-radius: 4px; background: #eef1f5; }
+
+    .web-evidence {
+      padding-top: 10px;
+      margin-top: 12px;
+      border-top: 1px solid #e1e5eb;
+      color: #536174;
+      font-size: 13px;
+    }
+
+    .web-evidence summary {
+      color: #334155;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 6px;
+      padding: 0;
+      margin: 8px 0 0;
+      list-style: none;
+    }
+
+    .source-list a {
+      color: #2459b3;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .search-badge {
+      display: inline-block;
+      padding: 3px 7px;
+      margin-top: 8px;
+      border-radius: 999px;
+      background: #e8f5ee;
+      color: #17643a;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .composer {
@@ -121,11 +216,11 @@
     }
 
     .nudge-above {
-      background: #eef4ff;
-      border-left: 4px solid #4a7cff;
       padding: 11px 12px;
       margin-bottom: 10px;
+      border-left: 4px solid #4a7cff;
       border-radius: 8px;
+      background: #eef4ff;
       line-height: 1.35;
     }
 
@@ -154,61 +249,81 @@
 
     .status { color: #687588; font-size: 14px; }
 
-    @media (max-width: 640px) {
+    @media (max-width: 760px) {
       body { padding: 0; }
-      .container { min-height: 100vh; border-radius: 0; padding: 20px 14px; }
-      .messages { height: 48vh; }
-      .message { max-width: 92%; }
+      .app { min-height: 100vh; grid-template-columns: 1fr; border-radius: 0; }
+      .history-panel { max-height: 210px; }
+      .history-list { max-height: 100px; }
+      .workspace { padding: 20px 14px; }
+      .messages { height: 46vh; }
+      .message { max-width: 94%; }
       .control { flex: 1 1 100%; }
     }
   </style>
 </head>
 
 <body>
-  <main class="container">
-    <h1>Prompt Nudge Chatbox Prototype</h1>
-    <p class="subtitle">Choose a writing nudge, then continue a real multi-turn conversation.</p>
+  <main class="app">
+    <aside class="history-panel" aria-label="Saved conversations">
+      <h2>Conversations</h2>
+      <button id="newChatButton" class="secondary" type="button">+ New conversation</button>
+      <div id="historyList" class="history-list"></div>
+      <button id="exportButton" class="secondary" type="button">Export research data</button>
+    </aside>
 
-    <div class="controls">
-      <div class="control">
-        <label for="nudgeSelect">Nudge</label>
-        <select id="nudgeSelect">
-          <option value="polite">Be polite</option>
-          <option value="concise">Be concise</option>
-          <option value="context">Add context</option>
-          <option value="specific">Be specific</option>
-          <option value="none">No nudge</option>
-        </select>
-      </div>
+    <section class="workspace">
+      <h1>Prompt Nudge Chatbox Prototype</h1>
+      <p class="subtitle">Choose a writing nudge, then continue a saved multi-turn conversation.</p>
 
-      <div class="control">
-        <label for="placementSelect">Placement</label>
-        <select id="placementSelect">
-          <option value="above">Above prompt box</option>
-          <option value="inside">Inside prompt box</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
+      <div class="controls">
+        <div class="control">
+          <label for="nudgeSelect">Nudge</label>
+          <select id="nudgeSelect">
+            <option value="polite">Be polite</option>
+            <option value="concise">Be concise</option>
+            <option value="context">Add context</option>
+            <option value="specific">Be specific</option>
+            <option value="none">No nudge</option>
+          </select>
+        </div>
 
-      <button id="newChatButton" class="secondary" type="button">New conversation</button>
-    </div>
+        <div class="control">
+          <label for="placementSelect">Placement</label>
+          <select id="placementSelect">
+            <option value="above">Above prompt box</option>
+            <option value="inside">Inside prompt box</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
 
-    <section class="chat-shell" aria-label="Chat conversation">
-      <div id="messages" class="messages" aria-live="polite"></div>
-
-      <div class="composer">
-        <div id="nudgeAbove" class="nudge-above"></div>
-        <textarea id="promptBox" aria-label="Prompt"></textarea>
-        <div class="composer-actions">
-          <span id="status" class="status">Ready</span>
-          <button id="sendButton" type="button">Send prompt</button>
+        <div class="control">
+          <label for="webSearchSelect">Web search</label>
+          <select id="webSearchSelect">
+            <option value="auto">Automatic</option>
+            <option value="always">Always search</option>
+            <option value="off">Off</option>
+          </select>
         </div>
       </div>
+
+      <section class="chat-shell" aria-label="Chat conversation">
+        <div id="messages" class="messages" aria-live="polite"></div>
+
+        <div class="composer">
+          <div id="nudgeAbove" class="nudge-above"></div>
+          <textarea id="promptBox" aria-label="Prompt"></textarea>
+          <div class="composer-actions">
+            <span id="status" class="status">Ready</span>
+            <button id="sendButton" type="button">Send prompt</button>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 
   <script>
-    const STORAGE_KEY = "prompt-nudge-v2-conversation";
+    const STORAGE_KEY = "prompt-nudge-v3-conversations";
+    const LEGACY_STORAGE_KEY = "prompt-nudge-v2-conversation";
     const nudges = {
       polite: {
         title: "Be polite",
@@ -230,58 +345,283 @@
         text: "State exactly what you want, including format, length, tone, or constraints.",
         placeholder: "Be specific... Mention format, tone, length, or requirements."
       },
-      none: { title: "", text: "", placeholder: "Type your prompt here..." }
+      none: { title: "No nudge", text: "", placeholder: "Type your prompt here..." }
     };
 
     const messagesElement = document.getElementById("messages");
+    const historyList = document.getElementById("historyList");
     const promptBox = document.getElementById("promptBox");
     const sendButton = document.getElementById("sendButton");
     const newChatButton = document.getElementById("newChatButton");
+    const exportButton = document.getElementById("exportButton");
     const nudgeSelect = document.getElementById("nudgeSelect");
     const placementSelect = document.getElementById("placementSelect");
+    const webSearchSelect = document.getElementById("webSearchSelect");
     const nudgeAbove = document.getElementById("nudgeAbove");
     const statusElement = document.getElementById("status");
 
-    let conversation = loadConversation();
+    let state = loadState();
 
-    function loadConversation() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (saved && Array.isArray(saved.messages)) {
-          return {
-            messages: saved.messages.filter(
-              message => message && ["user", "assistant"].includes(message.role) && typeof message.text === "string"
-            ),
-            previousResponseId: typeof saved.previousResponseId === "string" ? saved.previousResponseId : null
-          };
-        }
-      } catch (error) {
-        console.warn("Could not restore the saved conversation.", error);
-      }
-      return { messages: [], previousResponseId: null };
+    function createId() {
+      return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     }
 
-    function saveConversation() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversation));
+    function createConversation(messages = [], previousResponseId = null) {
+      const now = new Date().toISOString();
+      const firstUserMessage = messages.find(message => message.role === "user");
+      return {
+        id: createId(),
+        title: firstUserMessage ? firstUserMessage.text.slice(0, 45) : "New conversation",
+        createdAt: now,
+        updatedAt: now,
+        previousResponseId,
+        messages
+      };
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && Array.isArray(saved.conversations) && saved.conversations.length) {
+          return saved;
+        }
+      } catch (error) {
+        console.warn("Could not restore saved conversation threads.", error);
+      }
+
+      try {
+        const legacy = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY));
+        if (legacy && Array.isArray(legacy.messages)) {
+          const migratedMessages = legacy.messages.map(message => ({
+            id: createId(),
+            role: message.role,
+            text: message.text,
+            createdAt: new Date().toISOString()
+          }));
+          const migrated = createConversation(migratedMessages, legacy.previousResponseId || null);
+          return { activeConversationId: migrated.id, conversations: [migrated] };
+        }
+      } catch (error) {
+        console.warn("Could not migrate the previous conversation.", error);
+      }
+
+      const conversation = createConversation();
+      return { activeConversationId: conversation.id, conversations: [conversation] };
+    }
+
+    function getActiveConversation() {
+      let active = state.conversations.find(item => item.id === state.activeConversationId);
+      if (!active) {
+        active = state.conversations[0] || createConversation();
+        if (!state.conversations.length) state.conversations.push(active);
+        state.activeConversationId = active.id;
+      }
+      return active;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function appendInlineMarkdown(parent, text) {
+      const tokenPattern = /(\*\*[^*\n]+\*\*|`[^`\n]+`|\*[^*\n]+\*)/g;
+      let position = 0;
+      for (const match of text.matchAll(tokenPattern)) {
+        parent.append(document.createTextNode(text.slice(position, match.index)));
+        const token = match[0];
+        const element = document.createElement(
+          token.startsWith("**") ? "strong" : token.startsWith("`") ? "code" : "em"
+        );
+        element.textContent = token.startsWith("**") ? token.slice(2, -2) : token.slice(1, -1);
+        parent.append(element);
+        position = match.index + token.length;
+      }
+      parent.append(document.createTextNode(text.slice(position)));
+    }
+
+    function renderMarkdown(parent, markdown) {
+      const lines = markdown.replaceAll("\r\n", "\n").split("\n");
+      let list = null;
+      let inCodeBlock = false;
+      let codeLines = [];
+
+      function closeList() { list = null; }
+      function addTextBlock(tag, text) {
+        const element = document.createElement(tag);
+        appendInlineMarkdown(element, text);
+        parent.append(element);
+      }
+
+      for (const line of lines) {
+        if (line.trim().startsWith("```")) {
+          closeList();
+          if (inCodeBlock) {
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = codeLines.join("\n");
+            pre.append(code);
+            parent.append(pre);
+            codeLines = [];
+          }
+          inCodeBlock = !inCodeBlock;
+          continue;
+        }
+
+        if (inCodeBlock) {
+          codeLines.push(line);
+          continue;
+        }
+
+        if (!line.trim()) {
+          closeList();
+          continue;
+        }
+
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+        if (heading) {
+          closeList();
+          addTextBlock(`h${heading[1].length + 2}`, heading[2]);
+          continue;
+        }
+
+        const unordered = line.match(/^[-*]\s+(.+)$/);
+        const ordered = line.match(/^\d+\.\s+(.+)$/);
+        if (unordered || ordered) {
+          const desiredTag = unordered ? "UL" : "OL";
+          if (!list || list.tagName !== desiredTag) {
+            list = document.createElement(desiredTag.toLowerCase());
+            parent.append(list);
+          }
+          const item = document.createElement("li");
+          appendInlineMarkdown(item, (unordered || ordered)[1]);
+          list.append(item);
+          continue;
+        }
+
+        closeList();
+        addTextBlock("p", line);
+      }
+
+      if (inCodeBlock && codeLines.length) {
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = codeLines.join("\n");
+        pre.append(code);
+        parent.append(pre);
+      }
+    }
+
+    function renderConversationList() {
+      historyList.replaceChildren();
+      const sorted = [...state.conversations].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      for (const conversation of sorted) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `history-item${conversation.id === state.activeConversationId ? " active" : ""}`;
+        const title = document.createElement("span");
+        title.className = "history-title";
+        title.textContent = conversation.title || "New conversation";
+        const date = document.createElement("span");
+        date.className = "history-date";
+        date.textContent = new Date(conversation.updatedAt).toLocaleString();
+        button.append(title, date);
+        button.addEventListener("click", () => {
+          state.activeConversationId = conversation.id;
+          saveState();
+          renderAll();
+          promptBox.focus();
+        });
+        historyList.append(button);
+      }
+    }
+
+    function safeWebUrl(value) {
+      try {
+        const url = new URL(value);
+        return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function renderWebEvidence(parent, webSearch) {
+      if (!webSearch?.used) return;
+
+      const badge = document.createElement("span");
+      badge.className = "search-badge";
+      badge.textContent = "Web searched";
+      parent.append(badge);
+
+      const citedSources = Array.isArray(webSearch.citations) ? webSearch.citations : [];
+      const consultedSources = Array.isArray(webSearch.sources) ? webSearch.sources : [];
+      const candidates = citedSources.length ? citedSources : consultedSources;
+      const uniqueSources = [];
+      const seen = new Set();
+
+      for (const source of candidates) {
+        const url = safeWebUrl(source?.url);
+        if (!url || seen.has(url)) continue;
+        seen.add(url);
+        uniqueSources.push({
+          url,
+          title: typeof source.title === "string" && source.title.trim()
+            ? source.title.trim()
+            : new URL(url).hostname
+        });
+      }
+
+      if (!uniqueSources.length) return;
+
+      const details = document.createElement("details");
+      details.className = "web-evidence";
+      details.open = true;
+      const summary = document.createElement("summary");
+      summary.textContent = `Sources (${uniqueSources.length})`;
+      const list = document.createElement("ul");
+      list.className = "source-list";
+
+      for (const source of uniqueSources) {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = source.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = source.title;
+        item.append(link);
+        list.append(item);
+      }
+
+      details.append(summary, list);
+      parent.append(details);
     }
 
     function renderMessages() {
-      messagesElement.innerHTML = "";
-      if (conversation.messages.length === 0) {
+      const conversation = getActiveConversation();
+      messagesElement.replaceChildren();
+      if (!conversation.messages.length) {
         const empty = document.createElement("div");
         empty.className = "empty-state";
-        empty.textContent = "Your prompts and responses will stay here so you can scroll back and continue the conversation.";
-        messagesElement.appendChild(empty);
+        empty.textContent = "Start a conversation. Each thread is saved in this browser and can be reopened from the conversation list.";
+        messagesElement.append(empty);
         return;
       }
 
       for (const message of conversation.messages) {
         const bubble = document.createElement("div");
         bubble.className = `message ${message.role}`;
-        bubble.textContent = message.text;
-        messagesElement.appendChild(bubble);
+        if (message.role === "assistant") {
+          renderMarkdown(bubble, message.text);
+          renderWebEvidence(bubble, message.webSearch);
+        }
+        else bubble.textContent = message.text;
+        messagesElement.append(bubble);
       }
       messagesElement.scrollTop = messagesElement.scrollHeight;
+    }
+
+    function renderAll() {
+      renderConversationList();
+      renderMessages();
     }
 
     function updateNudge() {
@@ -315,10 +655,26 @@
       const prompt = promptBox.value.trim();
       if (!prompt || sendButton.disabled) return;
 
-      conversation.messages.push({ role: "user", text: prompt });
+      const conversation = getActiveConversation();
+      const selectedNudge = nudges[nudgeSelect.value];
+      const now = new Date().toISOString();
+      conversation.messages.push({
+        id: createId(),
+        role: "user",
+        text: prompt,
+        createdAt: now,
+        experiment: {
+          nudgeKey: nudgeSelect.value,
+          nudgeTitle: selectedNudge.title,
+          placement: placementSelect.value,
+          webSearchMode: webSearchSelect.value
+        }
+      });
+      if (conversation.title === "New conversation") conversation.title = prompt.slice(0, 45);
+      conversation.updatedAt = now;
       promptBox.value = "";
-      saveConversation();
-      renderMessages();
+      saveState();
+      renderAll();
       setLoading(true);
 
       try {
@@ -328,40 +684,72 @@
           body: JSON.stringify({
             prompt,
             previousResponseId: conversation.previousResponseId,
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            webSearchMode: webSearchSelect.value
           })
         });
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.reply || "The request failed.");
 
-        conversation.messages.push({ role: "assistant", text: data.reply });
+        conversation.messages.push({
+          id: createId(),
+          role: "assistant",
+          text: data.reply,
+          createdAt: new Date().toISOString(),
+          model: data.model || null,
+          responseId: data.responseId || null,
+          webSearch: data.webSearch || null
+        });
         conversation.previousResponseId = data.responseId || null;
       } catch (error) {
         conversation.messages.push({
+          id: createId(),
           role: "assistant",
-          text: error.message || "The AI could not respond right now. Please try again."
+          text: error.message || "The AI could not respond right now. Please try again.",
+          createdAt: new Date().toISOString(),
+          error: true
         });
       } finally {
-        saveConversation();
-        renderMessages();
+        conversation.updatedAt = new Date().toISOString();
+        saveState();
+        renderAll();
         setLoading(false);
         promptBox.focus();
       }
     }
 
     function startNewConversation() {
-      conversation = { messages: [], previousResponseId: null };
-      saveConversation();
-      renderMessages();
+      const conversation = createConversation();
+      state.conversations.push(conversation);
+      state.activeConversationId = conversation.id;
+      saveState();
+      renderAll();
       statusElement.textContent = "New conversation started";
       promptBox.focus();
+    }
+
+    function exportResearchData() {
+      const exportData = {
+        schemaVersion: 2,
+        exportedAt: new Date().toISOString(),
+        source: "Prompt Nudge Chatbox Prototype",
+        conversations: state.conversations
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `prompt-nudge-research-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
     }
 
     nudgeSelect.addEventListener("change", updateNudge);
     placementSelect.addEventListener("change", updateNudge);
     sendButton.addEventListener("click", sendPrompt);
     newChatButton.addEventListener("click", startNewConversation);
+    exportButton.addEventListener("click", exportResearchData);
     promptBox.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -369,8 +757,9 @@
       }
     });
 
+    saveState();
     updateNudge();
-    renderMessages();
+    renderAll();
   </script>
 </body>
 </html>
